@@ -35,8 +35,9 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
 
     val paginasTotales by viewModel.paginasTotales.collectAsStateWithLifecycle()
     val minutosPorPagina by viewModel.minutosPorPagina.collectAsStateWithLifecycle()
+    val minutosDiariosDisponibles by viewModel.minutosDiariosDisponibles.collectAsStateWithLifecycle()
     val tiempoTotalMinutos by viewModel.tiempoTotalMinutos.collectAsStateWithLifecycle()
-    val paginasDiarias by viewModel.paginasDiarias.collectAsStateWithLifecycle()
+    val diasEstimados by viewModel.diasEstimados.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -71,8 +72,19 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
 
             OutlinedTextField(
                 value = minutosPorPagina,
-                onValueChange = { viewModel.onMinutosChanged(it) },
+                onValueChange = { viewModel.onMinutosPorPaginaChanged(it) },
                 label = { Text("Minutos por página") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = minutosDiariosDisponibles,
+                onValueChange = { viewModel.onMinutosDiariosChanged(it) },
+                label = { Text("Minutos diarios a dedicar") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -89,7 +101,7 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Resumen",
+                        text = "Resumen de Lectura",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -98,7 +110,7 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Tiempo total estimado:")
+                        Text("Tiempo total necesario:")
                         Text(
                             text = "$tiempoTotalMinutos min",
                             fontWeight = FontWeight.Bold,
@@ -110,9 +122,9 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Meta para 1 semana:")
+                        Text("Días para terminar:")
                         Text(
-                            text = "$paginasDiarias pág/día",
+                            text = "$diasEstimados días",
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
