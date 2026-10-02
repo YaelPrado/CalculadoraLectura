@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -34,10 +37,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
 
     val paginasTotales by viewModel.paginasTotales.collectAsStateWithLifecycle()
+    val paginaActual by viewModel.paginaActual.collectAsStateWithLifecycle()
     val minutosPorPagina by viewModel.minutosPorPagina.collectAsStateWithLifecycle()
     val minutosDiariosDisponibles by viewModel.minutosDiariosDisponibles.collectAsStateWithLifecycle()
-    val tiempoTotalMinutos by viewModel.tiempoTotalMinutos.collectAsStateWithLifecycle()
-    val diasEstimados by viewModel.diasEstimados.collectAsStateWithLifecycle()
+    val tiempoRestanteMinutos by viewModel.tiempoRestanteMinutos.collectAsStateWithLifecycle()
+    val diasRestantesEstimados by viewModel.diasRestantesEstimados.collectAsStateWithLifecycle()
+    val progreso by viewModel.progreso.collectAsStateWithLifecycle()
+    val paginasRestantes by viewModel.paginasRestantes.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -54,21 +60,33 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
 
             OutlinedTextField(
                 value = paginasTotales,
-                onValueChange = { viewModel.onPaginasChanged(it) },
-                label = { Text("Total de páginas") },
+                onValueChange = { viewModel.onPaginasTotalesChanged(it) },
+                label = { Text("Total de páginas del libro") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = paginaActual,
+                onValueChange = { viewModel.onPaginaActualChanged(it) },
+                label = { Text("Página actual en la que vas") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = minutosPorPagina,
@@ -79,7 +97,7 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = minutosDiariosDisponibles,
@@ -92,6 +110,7 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Tarjeta de Resumen y Progreso
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -101,20 +120,43 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Resumen de Lectura",
+                        text = "Progreso de Lectura",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
+                    )
+
+                    // Barra de Progreso
+                    LinearProgressIndicator(
+                        progress = { progreso },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Tiempo total necesario:")
+                        Text("Avance:")
                         Text(
-                            text = "$tiempoTotalMinutos min",
+                            text = "${(progreso * 100).toInt()}%",
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Páginas restantes:")
+                        Text(
+                            text = "$paginasRestantes pág",
+                            fontWeight = FontWeight.Bold
                         )
                     }
 
@@ -122,9 +164,20 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Días para terminar:")
+                        Text("Tiempo restante necesario:")
                         Text(
-                            text = "$diasEstimados días",
+                            text = "$tiempoRestanteMinutos min",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Días restantes para terminar:")
+                        Text(
+                            text = "$diasRestantesEstimados días",
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
