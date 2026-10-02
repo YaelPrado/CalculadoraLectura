@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
 
     val paginasTotales by viewModel.paginasTotales.collectAsStateWithLifecycle()
@@ -44,6 +46,10 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
     val diasRestantesEstimados by viewModel.diasRestantesEstimados.collectAsStateWithLifecycle()
     val progreso by viewModel.progreso.collectAsStateWithLifecycle()
     val paginasRestantes by viewModel.paginasRestantes.collectAsStateWithLifecycle()
+
+
+    val colorHexProgreso by viewModel.colorHexProgreso.collectAsStateWithLifecycle()
+    val colorDinámico = Color(colorHexProgreso)
 
     Scaffold(
         topBar = {
@@ -110,7 +116,6 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tarjeta de Resumen y Progreso
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -125,13 +130,13 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                         fontWeight = FontWeight.Bold
                     )
 
-                    // Barra de Progreso
+                    // Barra de Progreso con el color que proviene exclusivamente del ViewModel
                     LinearProgressIndicator(
                         progress = { progreso },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(10.dp),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = colorDinámico,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
                     )
 
@@ -143,7 +148,7 @@ fun LecturaVMPage(viewModel: LecturaViewModel = viewModel()) {
                         Text(
                             text = "${(progreso * 100).toInt()}%",
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = colorDinámico
                         )
                     }
 

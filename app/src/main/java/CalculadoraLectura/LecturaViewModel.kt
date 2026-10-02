@@ -26,11 +26,15 @@ class LecturaViewModel : ViewModel() {
     private val _diasRestantesEstimados = MutableStateFlow(0)
     val diasRestantesEstimados: StateFlow<Int> = _diasRestantesEstimados.asStateFlow()
 
-    private val _progreso = MutableStateFlow(0f) // Valor flotante de 0.0 a 1.0 para la barra de progreso
+    private val _progreso = MutableStateFlow(0f)
     val progreso: StateFlow<Float> = _progreso.asStateFlow()
 
     private val _paginasRestantes = MutableStateFlow(0)
     val paginasRestantes: StateFlow<Int> = _paginasRestantes.asStateFlow()
+
+    // Estado del color (Hexadecimal) manejado por la lógica de negocio del ViewModel
+    private val _colorHexProgreso = MutableStateFlow(0xFFE91E63)
+    val colorHexProgreso: StateFlow<Long> = _colorHexProgreso.asStateFlow()
 
     fun onPaginasTotalesChanged(nuevoTexto: String) {
         _paginasTotales.value = nuevoTexto
@@ -58,28 +62,33 @@ class LecturaViewModel : ViewModel() {
         val minPorPag = _minutosPorPagina.value.toIntOrNull() ?: 0
         val minDiarios = _minutosDiariosDisponibles.value.toIntOrNull() ?: 0
 
-        // Validación de datos
         if (paginasTot <= 0 || minPorPag <= 0 || minDiarios <= 0 || pagActual < 0) {
             _tiempoRestanteMinutos.value = 0
             _diasRestantesEstimados.value = 0
             _progreso.value = 0f
             _paginasRestantes.value = 0
+            _colorHexProgreso.value = 0xFFE91E63 // Color inicial (Rosa/Rojo)
             return
         }
 
-        // Limitar la página actual para que no sea mayor que las páginas totales
         val pagActualValidada = pagActual.coerceAtMost(paginasTot)
-
-        // Cálculos
         val paginasFaltantes = paginasTot - pagActualValidada
         val minRestantes = paginasFaltantes * minPorPag
         val porcentaje = pagActualValidada.toFloat() / paginasTot.toFloat()
         val dias = ceil(minRestantes.toDouble() / minDiarios.toDouble()).toInt()
 
-        // Actualizar estados
         _paginasRestantes.value = paginasFaltantes
         _tiempoRestanteMinutos.value = minRestantes
         _progreso.value = porcentaje
         _diasRestantesEstimados.value = dias
+
+        // Lógica de determinación de color centralizada en el ViewModel
+        _colorHexProgreso.value = when {
+            porcentaje >= 1.0f -> 0xFF4CAF50 // Verde (Completado)
+            porcentaje >= 0.75f -> 0xFF8BC34A // Verde Lima
+            porcentaje >= 0.50f -> 0xFF2196F3 // Azul
+            porcentaje >= 0.25f -> 0xFF883838 // Naranja
+            else -> 0xFFE91E63              // Rosa/Rojo
+        }
     }
 }
