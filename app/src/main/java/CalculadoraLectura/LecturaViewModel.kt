@@ -1,0 +1,4 @@
+package CalculadoraLectura
+
+class LecturaViewModel {
+}
